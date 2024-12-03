@@ -1,0 +1,56 @@
+# sshd настройка
+---
+- name: Настройка SSHD 
+  hosts: all
+  become: yes
+  vars:
+    ssh_port: 22
+    permit_root_login: no
+    password_authentication: no
+    allow_users:
+      - user
+      - user1
+  tasks:
+    - name: Убедиться, что пакет openssh-server установлен
+      yum:
+        name: openssh-server
+        state: present
+
+    - name: Включить и запустить службу SSHD
+      systemd:
+        name: sshd
+        enabled: yes
+        state: started
+
+    - name: Создать резервную копию текущего sshd_config
+      copy:
+        src: /etc/ssh/sshd_config
+        dest: /etc/ssh/sshd_config.backup
+        remote_src: yes
+        backup: yes
+      when: backup_enabled | default(true)
+
+    - name: Настроить SSHD конфигурацию
+      template:
+        src: templates/sshd_config.j2
+        dest: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: '0600'
+      notify:
+        - Перезапустить SSHD
+
+    - name: Разрешить определенных пользователей через SSH
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^AllowUsers'
+        line: "AllowUsers {{ allow_users | join(' ') }}"
+        state: present
+      notify:
+        - Перезапустить SSHD
+
+  handlers:
+    - name: Перезапустить SSHD
+      systemd:
+        name: sshd
+        state: restarted
