@@ -7,9 +7,13 @@ PermitRootLogin {{ permit_root_login }}
 # Отключить аутентификацию по паролю
 PasswordAuthentication {{ password_authentication }}
 
+# Другие настройки по умолчанию
 ChallengeResponseAuthentication no
 UsePAM yes
 X11Forwarding yes
 PrintMotd no
 AcceptEnv LANG LC_*
 Subsystem   sftp    /usr/libexec/openssh/sftp-server
+
+# Разрешенные пользователи
+AllowUsers {{ allow_users | join(' ') }}

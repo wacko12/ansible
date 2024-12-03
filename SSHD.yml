@@ -1,12 +1,12 @@
 # sshd настройка
 ---
-- name: Настройка SSHD 
+- name: Настройка SSHD на RED OS 8
   hosts: all
   become: yes
   vars:
     ssh_port: 22
-    permit_root_login: no
-    password_authentication: no
+    permit_root_login: "no"
+    password_authentication: "no"
     allow_users:
       - user
       - user1
@@ -30,13 +30,14 @@
         backup: yes
       when: backup_enabled | default(true)
 
-    - name: Настроить SSHD конфигурацию
+    - name: Настроить SSHD конфигурацию с проверкой синтаксиса
       template:
-        src: sshd_config.j2
+        src: templates/sshd_config.j2
         dest: /etc/ssh/sshd_config
         owner: root
         group: root
         mode: '0600'
+        validate: 'sshd -t -f %s'
       notify:
         - Перезапустить SSHD
 
