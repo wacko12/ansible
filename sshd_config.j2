@@ -1,0 +1,15 @@
+# Порт SSH
+Port {{ ssh_port }}
+
+# Запретить вход под root
+PermitRootLogin {{ permit_root_login }}
+
+# Отключить аутентификацию по паролю
+PasswordAuthentication {{ password_authentication }}
+
+ChallengeResponseAuthentication no
+UsePAM yes
+X11Forwarding yes
+PrintMotd no
+AcceptEnv LANG LC_*
+Subsystem   sftp    /usr/libexec/openssh/sftp-server
