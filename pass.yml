@@ -1,0 +1,104 @@
+---
+- name: Настройка парольной палитики 
+  hosts: all
+  become: true
+  tasks:
+    - name: минимальная длина пароля 16 (1)
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: '^minlen='
+        line: 'minlen=16'
+        create: yes
+
+    - name: указать хотя бы 1 цифру (4)
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: '^dcredit='
+        line: 'dcredit=-1'
+        create: yes
+
+    - name: хотя бы 1 символ верхнего регистра (4)
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: '^ucredit='
+        line: 'ucredit=-1'
+        create: yes
+
+    - name: хотя бы 1 спец символ (4)
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: '^ocredit='
+        line: 'ocredit=-1'
+        create: yes
+
+    - name: хотя бы 1 символ нижнего регистра (4)
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: '^lcredit='
+        line: 'lcredit=-1'
+        create: yes
+
+    - name: отличие нового пароля от старого на 6 символов (8)
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: '^difok='
+        line: 'difok=6'
+        create: yes
+
+    - name: сохранение 10 последних паролей в системе (11)
+      lineinfile:
+        path: /etc/pam.d/system-auth
+        regexp: '^password\s+required\s+pam_pwhistory\.so'
+        line: 'password    required    pam_pwhistory.so remember=10 use_authtok'
+        backup: yes
+
+    - name: сохранение 10 последних паролей в системе (11)
+      lineinfile:
+        path: /etc/pam.d/password-auth
+        regexp: '^password\s+required\s+pam_pwhistory\.so'
+        line: 'password    required    pam_pwhistory.so remember=10 use_authtok'
+        backup: yes
+ 
+    - name: Установить deny=6 и unlock_time=1800 в password-auth (18+20)
+      lineinfile:
+        path: /etc/pam.d/password-auth
+        regexp: '^auth\s+required\s+pam_faillock\.so\s+preauth'
+        line: 'auth        required      pam_faillock.so preauth silent audit deny=6 unlock_time=1800'
+        backup: yes
+
+    - name: Установить deny=6 и unlock_time=1800 в password-auth (18+20)
+      lineinfile:
+        path: /etc/pam.d/password-auth
+        regexp: '^auth\s+\[default=die\]\s+pam_faillock\.so\s+authfail'
+        line: 'auth        [default=die] pam_faillock.so authfail audit deny=6 unlock_time=1800'
+        backup: yes
+
+    - name: Обеспечить наличие account required pam_faillock.so в password-auth (18+20)
+      lineinfile:
+        path: /etc/pam.d/password-auth
+        regexp: '^account\s+required\s+pam_faillock\.so'
+        line: 'account     required      pam_faillock.so'
+        insertbefore: '^account\s+required\s+pam_unix\.so'
+        backup: yes
+
+    - name: Установить deny=6 и unlock_time=1800 в system-auth (18+20)
+      lineinfile:
+        path: /etc/pam.d/system-auth
+        regexp: '^auth\s+required\s+pam_faillock\.so\s+preauth'
+        line: 'auth        required      pam_faillock.so preauth silent audit deny=6 unlock_time=1800'
+        backup: yes
+
+    - name: Установить deny=6 и unlock_time=1800 в system-auth (18+20)
+      lineinfile:
+        path: /etc/pam.d/system-auth
+        regexp: '^auth\s+\[default=die\]\s+pam_faillock\.so\s+authfail'
+        line: 'auth        [default=die] pam_faillock.so authfail audit deny=6 unlock_time=1800'
+        backup: yes
+
+    - name: Обеспечить наличие account required pam_faillock.so в system-auth (18+20)
+      lineinfile:
+        path: /etc/pam.d/system-auth
+        regexp: '^account\s+required\s+pam_faillock\.so'
+        line: 'account     required      pam_faillock.so'
+        insertbefore: '^account\s+required\s+pam_unix\.so'
+        backup: yes
