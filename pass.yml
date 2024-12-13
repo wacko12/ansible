@@ -59,6 +59,12 @@
         line: 'password    required    pam_pwhistory.so remember=10 use_authtok'
         backup: yes
  
+
+
+- name: Настройка требований по контролю доступа 
+  hosts: all
+  become: true
+  tasks:
     - name: Установить deny=6 и unlock_time=1800 в password-auth (18+20)
       lineinfile:
         path: /etc/pam.d/password-auth
