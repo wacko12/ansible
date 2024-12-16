@@ -92,6 +92,57 @@
       command: chage -M 99999 tuz
 
 
+- name: Установить минимальный срок действия пароля в 7 дней (23)
+  lineinfile:
+    path: /etc/login.defs
+    regexp: '^PASS_MIN_DAYS'
+    line: 'PASS_MIN_DAYS 7'
+    backup: yes
+
+- name: Настроить использование sha512 для шифрования паролей в system-auth (57)
+  lineinfile:
+    path: /etc/pam.d/system-auth
+    regexp: '^password\s+sufficient\s+pam_unix\.so'
+    line: 'password    sufficient    pam_unix.so sha512 shadow nullok try_first_pass use_authtok'
+    backup: yes
+
+- name: Настроить использование sha512 для шифрования паролей в password-auth (57)
+  lineinfile:
+    path: /etc/pam.d/password-auth
+    regexp: '^password\s+sufficient\s+pam_unix\.so'
+    line: 'password    sufficient    pam_unix.so sha512 shadow nullok try_first_pass use_authtok'
+    backup: yes
+
+- name: Включить проверку поля GECOS (190)
+  lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^gecoscheck='
+    line: 'gecoscheck=1'
+    create: yes
+
+- name: Включить проверку имени учетной записи (191)
+  lineinfile:
+    path: /etc/security/pwquality.conf
+    regexp: '^usercheck='
+    line: 'usercheck=1'
+    create: yes
+
+- name: Удалить небезопасные пакеты (164)
+  package:
+    name:
+      - telnet-server
+      - telnet
+      - net-snmp
+      - rsync
+      - talk
+      - postfix
+      - dovecot
+      - httpd
+      - vsftpd
+      - openldap-clients
+    state: absent
+
+
 - name: Настройка требований по контролю доступа 
   hosts: all
   become: true
