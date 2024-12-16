@@ -59,6 +59,37 @@
         line: 'password    required    pam_pwhistory.so remember=10 use_authtok'
         backup: yes
  
+    - name: максимум 2 одинаковых символа подряд (7)
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: '^maxrepeat='
+        line: 'maxrepeat=2'
+        create: yes
+
+    - name: максимальная закономерность 2 (14)
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: '^maxsequence='
+        line: 'maxsequence=2'
+        create: yes   
+        
+        
+    - name: Установить период смены пароля 180 дней для пользователй списка (22)
+      vars:
+         user_list: 
+          - user1
+          - user2
+          - user3
+      loop: "{{ user_list }}"
+      command: chage -M 180 {{ item }}
+      
+
+    - name: Установить период смены пароля 90 дней для root (22)
+      command: chage -M 90 root
+      
+
+    - name: Установить период смены пароля 99999 дней для tuz (22)
+      command: chage -M 99999 tuz
 
 
 - name: Настройка требований по контролю доступа 
