@@ -1,0 +1,18 @@
+---
+- hosts: vms
+  become: true
+  tasks:
+    - name: Удалить небезопасные пакеты (164)
+      package:
+        name:
+          - telnet-server
+          - telnet
+          - net-snmp
+          - rsync
+          - talk
+          - postfix
+          - dovecot
+          - httpd
+          - vsftpd
+          - openldap-clients
+        state: absent

@@ -1,0 +1,94 @@
+---
+- hosts: vms
+  become: true
+  tasks:
+    - name: Синхронизация системного времени (34)
+      vars:
+        ntp_servers:
+          - 0.ru.pool.ntp.org
+          - 1.ru.pool.ntp.org
+          - ntp2.vniiftri.ru
+          - ntp.ix.ru
+      block:
+        - name: Установка пакета chrony
+          package:
+            name: chrony
+            state: present
+      
+        - name: Отключение предустановленных серверов
+          lineinfile:
+            regexp: '^server\s'
+            line: '# {{ line }}'
+
+        - name: Установка новых серверов
+          lineinfile:
+            path: /etc/chrony/chrony.conf
+            regexp: '^server\s'
+            line: 'server {{ item }} iburst'
+            insertafter: '^#.*server\s'
+            state: present
+          loop: '{{ ntp_servers }}'
+
+        - name: Удаление предустановленных серверов
+          lineinfile:
+            path: /etc/chrony/chrony.conf
+            regexp: '^#.*server\s'
+            state: absent
+          
+        - name: Перезапуск сервера
+          service:
+            name: chrony
+            state: restarted
+            enabled: true
+        
+    - name: Защита от несанкционированного доступа (36)
+      command: update-crypto-policies --set DEFAULT
+            
+    # Не должно быть параметров: \m, \r, \s, \v и 'os platform'
+    # в файлах /etc/motd, /etc/issue, /etc/issue.net
+    # grep -E -i "(\\\b|\\\r|\\\m|\\\s|$(grep '^ID=' /etc/os-release | cut -d= -f2 | sed -e 's/"//g'))" /etc/motd
+    # - name: Ограничеине вывода критичной информации в сообщениях (37)
+    #   block:
+    #     - name: в файле /etc/motd
+    #       lineinfile:
+    #         path: /etc/motd
+    
+    - name: Шифрование канала (166)
+      block:
+      - name: Создание копии файла
+        copy:
+          path: /etc/crypto-ploicies/back-ends/opensslcnf.config
+          dest: /etc/crypto-ploicies/back-ends/opensslcnf.config.backup
+      
+      - name: Используемые алгоритмы
+        command: openssl ciphers -v 'TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_AES_128_CCM_SHA256:TLS_AES_128_CCM_8_SHA256:TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'
+
+    # TLS_AES_256_GCM_SHA384, TLS_AES_256_GCM_SHA384
+    # TLS_AES_128_GCM_SHA256, TLS_AES_128_GCM_SHA256
+    # TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, ECDHE-ECDSA-AES256-GCM-SHA384
+    # TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, ECDHE-RSA-AES256-GCM-SHA384
+    # TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE-ECDSA-AES128-GCM-SHA256
+    # TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE-RSA-AES128-GCM-SHA256
+    # TLS_AES_128_CCM_SHA256, TLS_AES_128_CCM_SHA256
+    # TLS_AES_128_CCM_8_SHA256, TLS_AES_128_CCM_8_SHA256
+    # TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, ECDHE-ECDSA-AES128-SHA256
+    # TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, ECDHE-RSA-AES128-SHA256
+    # - name: Шифрование канала (166)
+    #   block: 
+    #     - name: Ciphersuites
+    #       lineinfile: 
+    #         path: /etc/crypto-ploicies/back-ends/opensslcnf.config
+    #         regexp: '^Ciphersuites'
+    #         line: 'Ciphersuites = TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:TLS_AES_128_CCM_SHA256:TLS_AES_128_CCM_8_SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256'
+
+    #     - name: CipherString
+    #       lineinfile:
+    #         path: /etc/crypto-ploicies/back-ends/opensslcnf.config
+    #         regexp: '^CipherString'
+    #         line: 'CipherString = SECLEVEL=2'
+        
+    #     - name: 
+    #       lineinfile:
+    #         path: /etc/crypto-ploicies/back-ends/opensslcnf.config
+    #         regexp: '^SignatureAlgorithms'
+    #         line: 'SignatureAlgorithms = '

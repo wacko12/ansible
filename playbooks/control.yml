@@ -1,0 +1,36 @@
+---
+- hosts: vms
+  become: true
+  tasks:
+    - name: Завершение сеанса за бездействие (25)
+      block:
+      # Выскакивает ошибка
+      - name: Установка переменной окружения TMOUT
+        command: export TMOUT=60
+
+      - name: Создаем файл со скриптом
+        template:
+          src: template/control.timeout.j2
+          dest: /timeout
+          owner: root
+          group: root
+          mode: '0600'
+
+      - name: Добавления проверки на администратора
+        blockinfile:
+          path: /etc/profile
+          block: "{{ lookup('file', '/timeout') }}"
+          insertafter: EOF
+          backup: true
+      
+    # Дективация после 90 дней бездействия
+    - name: Деактивация неактивных УЗ (27)
+      block:
+        - name: Для УЗ 90 дней
+          command: chage --inactive 90 other
+
+        # - name: Проверка для 'other'
+        #   shell: grep -E ^[^:]+:[^\!*] /etc/shadow | cut -d -f1,7 
+
+        - name: ТУЗ нельзя деактивировать
+          command: chage --inactive -1 tuz

@@ -1,0 +1,3 @@
+if [ "$(id -u)" -ne 0 ] && !groups | grep -qw "wheel"; then
+    export TMOUT=60
+fi

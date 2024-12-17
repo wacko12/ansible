@@ -1,0 +1,18 @@
+---
+- name: Сервисы
+  import_playbook: playbooks/services.yaml
+
+- name: Пароли
+  import_playbook: playbooks/passwords.yaml
+
+- name: Контроль доступа
+  import_playbook: playbooks/control.yaml
+
+- name: Журналирование
+  import_playbook: playbooks/logs.yaml
+
+- name: ТП
+  import_playbook: playbooks/tp.yaml
+
+- name: SSHD
+  import_playbook: playbooks/SSHD.yml
