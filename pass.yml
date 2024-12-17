@@ -141,14 +141,10 @@
           - vsftpd
           - openldap-clients
         state: absent
-
-
-    - name: Настройка требований по контролю доступа 
-      hosts: all
-      become: true
-      tasks:
-        - name: Установить deny=6 и unlock_time=1800 в password-auth (18+20)
-          lineinfile:
+        
+        
+    - name: Установить deny=6 и unlock_time=1800 в password-auth (18+20)
+      lineinfile:
             path: /etc/pam.d/password-auth
             regexp: '^auth\s+required\s+pam_faillock\.so\s+preauth'
             line: 'auth        required      pam_faillock.so preauth silent audit deny=6 unlock_time=1800'
