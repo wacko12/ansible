@@ -2,5 +2,45 @@
 - hosts: vms
   become: true
   tasks:
-    # - name: Доступ к механизмам регистрации событий только у Админа ОС
-    
+    - name: Доступ к механизмам регистрации событий только у Админа ОС (32)
+      block: 
+        # на всякий
+        - name: Меняем владельца
+          command: chown root:root /etc/audit/auditd.conf
+
+        - name: Меняем разрешения 
+          command: chmod 0640 /etc/audit/auditd.conf
+
+    - name: Настройка файла конфигурации auditd.conf (41)
+      block:
+      # Сделал отдельно, так как с параметром backup
+      # после каждого изменения создается backup
+      - name: audit.conf backup
+        copy:
+          remote_src: true
+          src: /etc/audit/auditd.conf
+          dest: /etc/audit/auditd.conf.backup
+
+      - name: Настройка конфигурации
+        lineinfile:
+          path: /etc/audit/auditd.conf
+          regexp: "{{ item.regexp }}"
+          line: "{{ item.line }}"
+        loop:
+          - { regexp: "^log_file =", line: "log_file = /var/log/audit/audit.log" }
+          - { regexp: "^log_format =", line: "log_format = ENRICHED" }
+          - { regexp: "^priority_boost =", line: "priority_boost = 3" }
+          - { regexp: "^flush =", line: "flush = INCREMENTAL_ASYNC" }
+          - { regexp: "^freq =", line: "freq = 20" }
+          - { regexp: "^disp_qos =", line: "disp_qos = lossless" }
+          - { regexp: "^dispatcher =", line: "dispatcher = /sbin/audispd" }
+          - { regexp: "^name_format =", line: "name_format = HOSTNAME" }
+          - { regexp: "^max_log_file =", line: "max_log_file = 64" }
+          - { regexp: "^max_log_file_action =", line: "max_log_file_action = ROTATE" }
+          - { regexp: "^num_logs =", line: "num_logs = 5" }
+          - { regexp: "^space_left =", line: "space_left = 256" }
+          - { regexp: "^space_left_action =", line: "space_left_action = SYSLOG" }
+          - { regexp: "^admin_space_left =", line: "admin_space_left = 128" }
+          - { regexp: "^admin_space_left_action =", line: "admin_space_left_action = SYSLOG" }
+          - { regexp: "^disk_full_action =", line: "disk_full_action = SUSPEND" }
+          - { regexp: "^disk_error_action =", line: "disk_error_action = SUSPENSE" }
