@@ -1,0 +1,12 @@
+[33m0244d3d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mIlya[m[33m, [m[1;31morigin/matvey[m[33m, [m[1;32mmatvey[m[33m)[m Поместил составные таски в блоки и добавил 25, 27, 34, 36, 166
+[33md828b52[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m fix
+[33m2559311[m fix
+[33m073228e[m add 23, 57, 190, 191, 1164
+[33md047505[m add 7, 14, 22
+[33m2981339[m Check +fix
+[33m61753bf[m add pass file
+[33m06cfb68[m fix
+[33mde8c286[m Update SSHD.yml
+[33m791945a[m Create sshd_config.j2
+[33m011aff1[m Update and rename SSHD to SSHD.yml
+[33m21d44fa[m Create SSHD

@@ -3,4 +3,59 @@
   become: true
   tasks:
     # - name: Доступ к механизмам регистрации событий только у Админа ОС
-    
+
+
+   - name: Настроить аудит изменений прав доступа (30)  
+     blockinfile:
+       path: /etc/audit/rules.d/perm_mod.rules
+       create: yes
+       block: |
+         -a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+         -a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+         -a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+
+         -a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+         -a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+         -a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+
+   - name: Настроить аудит указанных событий (31)
+     blockinfile:
+       path: /etc/audit/audit.rules
+       insertafter: EOF
+       block: |
+         # Начало работы (запуск) системы
+         -a always,exit -F arch=b64 -S adjtimex -S settimeofday -k system_start_stop
+         -a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k system_start_stop
+
+         # Окончание (остановка) работы системы
+         -a always,exit -F arch=b64 -S reboot -S kexec -k system_start_stop
+         -a always,exit -F arch=b32 -S reboot -S kexec -k system_start_stop
+
+         # Вход пользователя в систему и выход из системы
+         -w /var/log/wtmp -p wa -k logins
+         -w /var/log/btmp -p wa -k logins
+         -w /var/log/utmp -p wa -k logins
+
+         # Неуспешный вход в систему
+         -w /var/log/faillog -p wa -k logins
+
+
+
+   - name: Добавить правила аудита в отдельный файл в /etc/audit/rules.d/ (43)
+     blockinfile:
+       path: /etc/audit/rules.d/custom.rules
+       create: yes
+       block: |
+         -D
+         -i
+         -b 32768
+         -a never,exit -F exe=/usr/bin/vmtoolsd
+         -a never,exit -F exe=/usr/sbin/haproxy
+         -a never,exit -F exe=/usr/sbin/cron
+         -a never,exit -F exe=/lib/systemd/systemd-timesyncd
+         -a never,exit -F exe=/lib/systemd/systemd-logind
+         -a never,exit -F exe=/bin/pidof
+         -a never,exit -F exe=/bin/sleep
+         -a never,exit -F exe=/opt/kaspersky/klagent64/sbin/klagent
+         -a never,exit -F uid=oasvc
+
