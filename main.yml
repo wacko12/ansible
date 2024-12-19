@@ -16,3 +16,6 @@
 
 - name: SSHD
   import_playbook: playbooks/SSHD.yml
+
+- name: SSH
+  import_playbook: playbooks/SSH.yml

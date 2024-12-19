@@ -1,0 +1,46 @@
+---
+- hosts: vms
+  become: true
+  tasks:
+    - name: Установить SSH Idle Timeout (189)
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^ClientAliveInterval'
+        line: 'ClientAliveInterval 900'
+        backup: yes
+
+    - name: Установить ClientAliveCountMax (189)
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^ClientAliveCountMax'
+        line: 'ClientAliveCountMax 0'
+        backup: yes
+
+    - name: Настроить предупреждающий баннер SSH (192)
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^Banner'
+        line: 'Banner /etc/issue.net'
+        backup: yes
+
+    - name: Отключить HostbasedAuthentication (194)
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^HostbasedAuthentication'
+        line: 'HostbasedAuthentication no'
+        backup: yes
+
+    - name: Установить umask 027 в /etc/bashrc (195)
+      lineinfile:
+        path: /etc/bashrc
+        regexp: '^umask'
+        line: 'umask 027'
+        insertafter: EOF
+        backup: yes
+
+    - name: Установить протокол SSH версии 2 (196)
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^Protocol'
+        line: 'Protocol 2'
+        backup: yes

@@ -1,0 +1,9 @@
+---
+- name: SSH
+  import_playbook: playbooks/SSH.yml
+  
+- name: Журналирование
+  import_playbook: playbooks/logs.yaml
+
+- name: Пароли
+  import_playbook: playbooks/passwords.yaml
